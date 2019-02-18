@@ -10,5 +10,6 @@ build
 # Ignore Eclipse project settings
 .classpath
 .project
+.settings/
 *.class
 /bin/

@@ -1,4 +1,4 @@
-package java.main.cs455.scaling.server;
+package cs455.scaling.server;
 
 public class Server {
 
