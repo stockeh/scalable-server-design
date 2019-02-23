@@ -7,7 +7,6 @@ import java.nio.channels.SocketChannel;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Random;
 import cs455.scaling.util.Logger;
 import cs455.scaling.util.TransmissionUtilities;
 
@@ -22,8 +21,6 @@ public class Client {
   private List<String> hashes;
 
   private SocketChannel channel;
-
-  private ByteBuffer sendingBuffer;
 
   private ByteBuffer receivingBuffer;
 
@@ -62,12 +59,17 @@ public class Client {
       LOG.error( "Unable to initialize. " + e.getMessage() );
       return;
     }
-
-    client.start( messageRate );
+    ( new Thread(
+        new SenderThread( client.channel, messageRate, client.hashes ) ) )
+            .start();
+    client.read( messageRate );
   }
 
   /**
-   * Constructor
+   * Client constructor which establishes a new connection with the
+   * server (as specified by the arguments). Allocates memory for the
+   * sending, and receiving buffer, as well as a new
+   * <code>LinkedList</code> for the computed hashes.
    * 
    * @param serverHost
    * @param serverPort
@@ -76,8 +78,6 @@ public class Client {
   private Client(String serverHost, int serverPort) throws IOException {
     channel =
         SocketChannel.open( new InetSocketAddress( serverHost, serverPort ) );
-
-    sendingBuffer = ByteBuffer.allocate( TransmissionUtilities.EIGHT_KB );
 
     receivingBuffer = ByteBuffer.allocate( TransmissionUtilities.FOURTY_B );
 
@@ -89,42 +89,19 @@ public class Client {
    * 
    * @param messageRate
    */
-  private void start(int messageRate) {
-    int rounds = 2;
-    while ( rounds-- > 0 )
+  private void read(int messageRate) {
+    while ( true )
     {
-      byte[] msg = new byte[ TransmissionUtilities.EIGHT_KB ];
-      ( new Random() ).nextBytes( msg );
-      sendingBuffer = ByteBuffer.wrap( msg );
-
-      String hash = TransmissionUtilities.SHA1FromBytes( msg );
-      synchronized ( hashes )
-      {
-        hashes.add( hash );
-      }
-      LOG.debug( "Sending: " + hash );
-
       try
       {
-        channel.write( sendingBuffer );
-        sendingBuffer.clear();
         channel.read( receivingBuffer );
 
         acknowledgeResponse();
 
-        sendingBuffer.clear();
         receivingBuffer.clear();
       } catch ( IOException e )
       {
         LOG.error( "Unable to send / receive message. " + e.getMessage() );
-      }
-      try
-      {
-        Thread.sleep( 1000 / messageRate );
-      } catch ( InterruptedException e )
-      {
-        LOG.error( "Interrupted and unable to sleep between transmissions."
-            + e.getMessage() );
       }
     }
   }

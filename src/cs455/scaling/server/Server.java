@@ -7,8 +7,11 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import cs455.scaling.util.Logger;
 import cs455.scaling.util.TransmissionUtilities;
 
@@ -19,6 +22,16 @@ public class Server {
    * Logger(INFO, DEBUG) and LOGGER#MASTER for ERROR settings.
    */
   private static final Logger LOG = new Logger( true, true );
+
+  private final ThreadPoolManager threadPoolManager;
+
+  private List<byte[]> unit;
+
+  private final int batchSize;
+
+  private final int batchTime;
+
+  private long initTime;
 
   /**
    * Driver
@@ -33,15 +46,31 @@ public class Server {
     }
     LOG.info( "Server starting up at: " + new Date() );
 
-    Server server = new Server();
+    int[] arguments = new int[ 4 ];
+    for ( int i = 0; i < 4; ++i )
+    {
+      arguments[ i ] = Integer.parseInt( args[ i ] );
+    }
+
+    Server server = new Server( arguments );
+
+    server.threadPoolManager.start();
     try
     {
-      server.start( Integer.parseInt( args[ 0 ] ) );
+      server.start( arguments[ 0 ] );
     } catch ( NumberFormatException | IOException e )
     {
       LOG.error( "Unable to initialize. " + e.getMessage() );
       return;
     }
+  }
+
+  public Server(int[] arguments) {
+    this.unit = Collections.synchronizedList( new LinkedList<byte[]>() );
+    this.threadPoolManager = new ThreadPoolManager( arguments[ 1 ] );
+    this.batchSize = arguments[ 2 ];
+    this.batchTime = arguments[ 3 ];
+    this.initTime = System.nanoTime();
   }
 
   /**
@@ -77,7 +106,7 @@ public class Server {
 
         if ( key.isReadable() )
         {
-          readAndRespond( key );
+          read( key );
         }
         iter.remove();
       }
@@ -90,7 +119,7 @@ public class Server {
    * @param key
    * @throws IOException
    */
-  private static void readAndRespond(SelectionKey key) throws IOException {
+  private void read(SelectionKey key) throws IOException {
 
     ByteBuffer buffer = ByteBuffer.allocate( TransmissionUtilities.EIGHT_KB );
 
@@ -103,11 +132,28 @@ public class Server {
       LOG.info( "Client disconnected" );
     } else
     {
-      String hash = TransmissionUtilities.SHA1FromBytes( buffer.array() );
-      LOG.debug( "Received: " + hash );
+      LOG.debug( "Received: "
+          + TransmissionUtilities.SHA1FromBytes( buffer.array() ) );
 
-      buffer.flip();
-      client.write( ByteBuffer.wrap( hash.getBytes() ) );
+      synchronized ( unit )
+      {
+
+        unit.add( buffer.array() );
+
+        if ( unit.size() == batchSize || ( ( int ) Math
+            .round( ( System.nanoTime() - initTime ) / 1E9 ) == batchTime ) )
+        {
+          Task task = new Task( unit, client );
+          try
+          {
+            threadPoolManager.execute( task );
+          } catch ( InterruptedException e )
+          {
+            e.printStackTrace();
+          }
+          initTime = System.nanoTime();
+        }
+      }
       buffer.clear();
     }
   }
@@ -115,15 +161,12 @@ public class Server {
   /**
    * 
    * 
-   * e8ec30fb368fc802ce200304478effc9da5aca1c
-   * e8ec30fb368fc802ce200304478effc9da5aca1c
-   * 
    * @param selector
    * @param serverSocket
    * @throws IOException
    */
-  private static void register(Selector selector,
-      ServerSocketChannel serverSocket) throws IOException {
+  private void register(Selector selector, ServerSocketChannel serverSocket)
+      throws IOException {
 
     SocketChannel client = serverSocket.accept();
     client.configureBlocking( false );

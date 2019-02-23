@@ -35,8 +35,7 @@ public class TransmissionUtilities {
     }
     byte[] hash = digest.digest( data );
     BigInteger hashInt = new BigInteger( 1, hash );
-
-    return hashInt.toString( 16 );
+    return String.format("%40s", hashInt.toString( 16 )).replace(' ', '0');
   }
 
 
