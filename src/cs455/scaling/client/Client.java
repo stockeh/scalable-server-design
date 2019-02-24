@@ -10,6 +10,12 @@ import java.util.List;
 import cs455.scaling.util.Logger;
 import cs455.scaling.util.TransmissionUtilities;
 
+/**
+ * 
+ * 
+ * @author stock
+ *
+ */
 public class Client {
 
   /**
@@ -119,7 +125,8 @@ public class Client {
       String response = new String( receivingBuffer.array() ).trim();
       if ( hashes.remove( response ) )
       {
-        LOG.debug( Integer.toString( ++received ) + " messages received." );
+        LOG.debug( Integer.toString( ++received ) + " messages received. "
+            + hashes.size() + " hashes." );
       }
     }
   }

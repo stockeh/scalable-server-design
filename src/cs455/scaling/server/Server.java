@@ -20,7 +20,7 @@ public class Server {
    * Have the ability to log output INFO, DEBUG, ERROR configured by
    * Logger(INFO, DEBUG) and LOGGER#MASTER for ERROR settings.
    */
-  private static final Logger LOG = new Logger( true, true );
+  private static final Logger LOG = new Logger( true, false );
 
   private final ThreadPoolManager threadPoolManager;
 
@@ -143,6 +143,8 @@ public class Server {
   private synchronized void process(ByteBuffer buffer, SocketChannel client) {
     unit.add( buffer.array() );
     clients.add( client );
+    // TODO: is it important to have own thread for checking timing?
+    // https://www.geeksforgeeks.org/java-util-timertask-class-java/
     if ( unit.size() == batchSize || ( ( int ) Math
         .round( ( System.nanoTime() - initTime ) / 1E9 ) == batchTime ) )
     {
@@ -156,6 +158,7 @@ public class Server {
       }
       initTime = System.nanoTime();
     }
+    System.out.println( "Unit Size: " + unit.size() );
     buffer.clear();
   }
 

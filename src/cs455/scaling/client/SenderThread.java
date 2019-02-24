@@ -34,8 +34,7 @@ public class SenderThread implements Runnable {
 
   @Override
   public void run() {
-    int rounds = 10;
-    LOG.debug( Integer.toString( rounds ) + " messages sent." );
+    int rounds = 100; // rounds-- > 0
     while ( rounds-- > 0 )
     {
       byte[] msg = new byte[ TransmissionUtilities.EIGHT_KB ];
