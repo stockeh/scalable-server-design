@@ -24,6 +24,8 @@ public class Client {
 
   private ByteBuffer receivingBuffer;
 
+  private int received = 0;
+
   /**
    * Driver
    * 
@@ -112,15 +114,13 @@ public class Client {
    * 
    */
   private void acknowledgeResponse() {
-    String response = new String( receivingBuffer.array() ).trim();
     synchronized ( hashes )
     {
+      String response = new String( receivingBuffer.array() ).trim();
       if ( hashes.remove( response ) )
       {
-        LOG.debug( "Sucessfully processed " + response );
+        LOG.debug( Integer.toString( ++received ) + " messages received." );
       }
-      LOG.debug(
-          "There are still " + hashes.size() + " transmission to process." );
     }
   }
 }

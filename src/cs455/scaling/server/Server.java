@@ -7,7 +7,6 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -26,6 +25,8 @@ public class Server {
   private final ThreadPoolManager threadPoolManager;
 
   private List<byte[]> unit;
+
+  private List<SocketChannel> clients;
 
   private final int batchSize;
 
@@ -66,7 +67,8 @@ public class Server {
   }
 
   public Server(int[] arguments) {
-    this.unit = Collections.synchronizedList( new LinkedList<byte[]>() );
+    this.unit = new LinkedList<byte[]>();
+    this.clients = new LinkedList<SocketChannel>();
     this.threadPoolManager = new ThreadPoolManager( arguments[ 1 ] );
     this.batchSize = arguments[ 2 ];
     this.batchTime = arguments[ 3 ];
@@ -134,28 +136,27 @@ public class Server {
     {
       LOG.debug( "Received: "
           + TransmissionUtilities.SHA1FromBytes( buffer.array() ) );
-
-      synchronized ( unit )
-      {
-
-        unit.add( buffer.array() );
-
-        if ( unit.size() == batchSize || ( ( int ) Math
-            .round( ( System.nanoTime() - initTime ) / 1E9 ) == batchTime ) )
-        {
-          Task task = new Task( unit, client );
-          try
-          {
-            threadPoolManager.execute( task );
-          } catch ( InterruptedException e )
-          {
-            e.printStackTrace();
-          }
-          initTime = System.nanoTime();
-        }
-      }
-      buffer.clear();
+      process( buffer, client );
     }
+  }
+
+  private synchronized void process(ByteBuffer buffer, SocketChannel client) {
+    unit.add( buffer.array() );
+    clients.add( client );
+    if ( unit.size() == batchSize || ( ( int ) Math
+        .round( ( System.nanoTime() - initTime ) / 1E9 ) == batchTime ) )
+    {
+      Task task = new Task( unit, clients );
+      try
+      {
+        threadPoolManager.execute( task );
+      } catch ( InterruptedException e )
+      {
+        e.printStackTrace();
+      }
+      initTime = System.nanoTime();
+    }
+    buffer.clear();
   }
 
   /**

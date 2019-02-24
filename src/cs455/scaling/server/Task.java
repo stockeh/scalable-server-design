@@ -15,17 +15,16 @@ public class Task implements Runnable {
    */
   private static final Logger LOG = new Logger( true, true );
 
-
-  private final SocketChannel client;
-
-
   private byte[][] unit;
 
-  public Task(List<byte[]> unit, SocketChannel client) {
+  private SocketChannel[] clients;
+
+  public Task(List<byte[]> unit, List<SocketChannel> clients) {
     this.unit = unit
         .toArray( new byte[ unit.size() ][ TransmissionUtilities.EIGHT_KB ] );
     unit.clear();
-    this.client = client;
+    this.clients = clients.toArray( new SocketChannel[ clients.size() ] );
+    clients.clear();
   }
 
   @Override
@@ -35,7 +34,7 @@ public class Task implements Runnable {
       String hash = TransmissionUtilities.SHA1FromBytes( unit[ i ] );
       try
       {
-        client.write( ByteBuffer.wrap( hash.getBytes() ) );
+        clients[ i ].write( ByteBuffer.wrap( hash.getBytes() ) );
       } catch ( IOException e )
       {
         LOG.error( e.getMessage() );
