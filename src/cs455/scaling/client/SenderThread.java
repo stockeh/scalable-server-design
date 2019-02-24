@@ -35,6 +35,7 @@ public class SenderThread implements Runnable {
   @Override
   public void run() {
     int rounds = 10;
+    LOG.debug( Integer.toString( rounds ) + " messages sent." );
     while ( rounds-- > 0 )
     {
       byte[] msg = new byte[ TransmissionUtilities.EIGHT_KB ];
@@ -46,8 +47,6 @@ public class SenderThread implements Runnable {
       {
         hashes.add( hash );
       }
-      LOG.debug( "Sending: " + hash );
-
       try
       {
         channel.write( sendingBuffer );
