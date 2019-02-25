@@ -38,7 +38,7 @@ public class ThreadPoolManager {
 
     for ( int i = 0; i < numberOfThreads; ++i )
     {
-      threads[ i ] = new WorkerThread( queue );
+      threads[ i ] = new WorkerThread( queue, i );
     }
   }
 
@@ -61,10 +61,7 @@ public class ThreadPoolManager {
    * @param task
    * @throws InterruptedException
    */
-  public void execute(Runnable task) throws InterruptedException {
-    synchronized ( queue )
-    {
-      queue.put( ( Task ) task );
-    }
+  public void addTask(Task task) throws InterruptedException {
+    queue.put( task );
   }
 }

@@ -1,6 +1,7 @@
 package cs455.scaling.server;
 
 import java.util.concurrent.LinkedBlockingQueue;
+import cs455.scaling.util.Logger;
 
 /**
  * Working thread that processes objects off of the queue.
@@ -13,7 +14,15 @@ import java.util.concurrent.LinkedBlockingQueue;
  */
 class WorkerThread extends Thread {
 
+  /**
+   * Have the ability to log output INFO, DEBUG, ERROR configured by
+   * Logger(INFO, DEBUG) and LOGGER#MASTER for ERROR settings.
+   */
+  private static final Logger LOG = new Logger( true, true );
+
   private final LinkedBlockingQueue<Task> queue;
+
+  private final int identifier;
 
   /**
    * Default constructor to construct the working thread, and hold a
@@ -21,8 +30,9 @@ class WorkerThread extends Thread {
    * 
    * @param queue
    */
-  public WorkerThread(LinkedBlockingQueue<Task> queue) {
+  public WorkerThread(LinkedBlockingQueue<Task> queue, int identifier) {
     this.queue = queue;
+    this.identifier = identifier;
   }
 
   /**
@@ -47,6 +57,8 @@ class WorkerThread extends Thread {
       }
       try
       {
+        LOG.debug(
+            "Thread: " + Integer.toString( identifier ) + " is executing." );
         task.run();
       } catch ( RuntimeException e )
       {
