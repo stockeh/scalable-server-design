@@ -14,6 +14,25 @@ import java.util.List;
 import cs455.scaling.util.Logger;
 import cs455.scaling.util.TransmissionUtilities;
 
+/**
+ * Only one server node in the system to manage incoming connections /
+ * messages.
+ * 
+ * A server node will spawn a new thread pool manager with a set
+ * number of threads. The following functionalities will be provided,
+ * and rely on this thread pool:
+ * 
+ * <ul>
+ * <li>Accept incoming network connections from the clients.</li>
+ * <li>Accept incoming traffic from these connections.</li>
+ * <li>Groups data from the clients together into batches.</li>
+ * <li>Replies to clients by sending back a hash code for each message
+ * provided.</li>
+ * </ul>
+ * 
+ * @author stock
+ *
+ */
 public class Server {
 
   /**
@@ -24,7 +43,7 @@ public class Server {
 
   private final ThreadPoolManager threadPoolManager;
 
-  private List<byte[]> unit;
+  private List<byte[]> data;
 
   private List<SocketChannel> clients;
 
@@ -35,14 +54,16 @@ public class Server {
   private long initTime;
 
   /**
-   * Driver
+   * Entry point for the server, specifying the configuration via the
+   * command arguments.
    * 
-   * @param args
+   * @param args command line arguments include; port-number,
+   *        tread-pool-size, batch-size, and batch-time
    */
   public static void main(String[] args) {
     if ( args.length < 4 )
     {
-      LOG.error( "USAGE: portnum tread-pool-size batch-size batch-time" );
+      LOG.error( "USAGE: port-numumber tread-pool-size batch-size batch-time" );
       return;
     }
     LOG.info( "Server starting up at: " + new Date() );
@@ -66,8 +87,14 @@ public class Server {
     }
   }
 
+  /**
+   * Server constructor to initialize the object configuration. The
+   * thread pool manager is constructed at this point.
+   * 
+   * @param arguments
+   */
   public Server(int[] arguments) {
-    this.unit = new LinkedList<byte[]>();
+    this.data = new LinkedList<byte[]>();
     this.clients = new LinkedList<SocketChannel>();
     this.threadPoolManager = new ThreadPoolManager( arguments[ 1 ] );
     this.batchSize = arguments[ 2 ];
@@ -76,9 +103,14 @@ public class Server {
   }
 
   /**
-   * Processor
+   * Once the server object is configured, it can set up a new server
+   * socket channel, and begin accepting new connections.
    * 
-   * @param port
+   * This method will continuously run accepting new connections, and
+   * reading messages.
+   * 
+   * @param port specifies the port to which the server socket channel
+   *        will be listening.
    * @throws IOException
    */
   private void start(int port) throws IOException {
@@ -116,9 +148,11 @@ public class Server {
   }
 
   /**
-   * Read and respond to messages
+   * Read incoming messages from a given channel, check if the client
+   * has disconnected, or if there is data to be process.
    * 
-   * @param key
+   * @param key a token representing the registration of a
+   *        SelectableChannel with a Selector.
    * @throws IOException
    */
   private void read(SelectionKey key) throws IOException {
@@ -140,15 +174,27 @@ public class Server {
     }
   }
 
+  /**
+   * Synchronized method to process incoming messages from a given
+   * client. The data that was read into the buffer, and its respective
+   * client is added to a linked list. A new task is created and added
+   * to a queue for the thread pool manager to process with the data and
+   * client information.
+   * 
+   * @param buffer containing the data pay load that is to be converted
+   *        to a <code>byte[]</byte>.
+   * @param client connection information for where to send the data
+   *        back to.
+   */
   private synchronized void process(ByteBuffer buffer, SocketChannel client) {
-    unit.add( buffer.array() );
+    data.add( buffer.array() );
     clients.add( client );
     // TODO: is it important to have own thread for checking timing?
     // https://www.geeksforgeeks.org/java-util-timertask-class-java/
-    if ( unit.size() == batchSize || ( ( int ) Math
+    if ( data.size() == batchSize || ( ( int ) Math
         .round( ( System.nanoTime() - initTime ) / 1E9 ) == batchTime ) )
     {
-      Task task = new Task( unit, clients );
+      Task task = new Task( data, clients );
       try
       {
         threadPoolManager.execute( task );
@@ -158,12 +204,12 @@ public class Server {
       }
       initTime = System.nanoTime();
     }
-    System.out.println( "Unit Size: " + unit.size() );
+    System.out.println( "Unit Size: " + data.size() );
     buffer.clear();
   }
 
   /**
-   * 
+   * Invoked upon a new client registering itself with the server.
    * 
    * @param selector
    * @param serverSocket
@@ -177,5 +223,4 @@ public class Server {
     client.register( selector, SelectionKey.OP_READ );
     LOG.info( "New client " + client.getRemoteAddress() + " has registered" );
   }
-
 }
