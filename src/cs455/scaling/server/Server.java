@@ -197,14 +197,15 @@ public class Server {
       Task task = new Task( data, clients );
       try
       {
-        threadPoolManager.execute( task );
+        threadPoolManager.addTask( task );
       } catch ( InterruptedException e )
       {
-        e.printStackTrace();
+        LOG.error(
+            "Unable to add task to thread pool queue. " + e.getMessage() );
       }
       initTime = System.nanoTime();
     }
-    System.out.println( "Unit Size: " + data.size() );
+    LOG.debug( "Unit Size: " + data.size() );
     buffer.clear();
   }
 

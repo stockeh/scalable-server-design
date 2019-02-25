@@ -14,10 +14,12 @@ import cs455.scaling.util.TransmissionUtilities;
  * respond to data. When a new thread is available in thread pool
  * manager, a thread will execute this task.
  * 
+ * TODO: implement Runnable?
+ * 
  * @author stock
  *
  */
-public class Task implements Runnable {
+public class Task {
 
   /**
    * Have the ability to log output INFO, DEBUG, ERROR configured by
@@ -50,12 +52,11 @@ public class Task implements Runnable {
   /**
    * Executes when a new thread becomes available, writing the data back
    * to the respective client. The hash of the each message will be
-   * computed, and sent as the pay load back to the client.
+   * computed, and sent as the pay load back to the client.  
    * 
    * TODO: Does this need to be runnable?
    * 
    */
-  @Override
   public void run() {
     for ( int i = 0; i < data.length; ++i )
     {

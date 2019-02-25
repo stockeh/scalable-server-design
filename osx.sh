@@ -1,9 +1,9 @@
 HOST=localhost
 PORT=5001
-RATE=2
+RATE=3
 
 POOL_SIZE=10
-BATCH_SIZE=10
+BATCH_SIZE=20
 BATCH_TIME=5
 
 DIR="$( cd "$( dirname "$0" )" && pwd )"
