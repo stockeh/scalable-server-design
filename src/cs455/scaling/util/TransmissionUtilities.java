@@ -4,6 +4,12 @@ import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+/**
+ * Utilities class that are shared between the client and the server.
+ * 
+ * @author stock
+ *
+ */
 public class TransmissionUtilities {
 
   /**
@@ -12,12 +18,20 @@ public class TransmissionUtilities {
    */
   private static final Logger LOG = new Logger( true, true );
 
+  /**
+   * Buffer size for the pay load (value) from the client to the server.
+   */
   public static final int EIGHT_KB = 8000;
 
-  public static final int FOURTY_B = 40;
+  /**
+   * Buffer size for the pay load (hash) from the server to the client.
+   */
+  public static final int FORTY_B = 40;
 
   /**
-   * computes the SHA-1 hash of a byte array to a <code>String</code>.
+   * Computes the SHA-1 hash of a byte array to a <code>String</code>.
+   * The returned value will be left padded with zeros if less than
+   * forty bytes.
    * 
    * @param data as an array of bytes
    * @return its representation as a hex string
@@ -35,8 +49,6 @@ public class TransmissionUtilities {
     }
     byte[] hash = digest.digest( data );
     BigInteger hashInt = new BigInteger( 1, hash );
-    return String.format("%40s", hashInt.toString( 16 )).replace(' ', '0');
+    return String.format( "%40s", hashInt.toString( 16 ) ).replace( ' ', '0' );
   }
-
-
 }

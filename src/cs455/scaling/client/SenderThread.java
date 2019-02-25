@@ -8,6 +8,13 @@ import java.util.Random;
 import cs455.scaling.util.Logger;
 import cs455.scaling.util.TransmissionUtilities;
 
+/**
+ * The sender thread will run continuously sending messages from the
+ * respective client to the server.
+ * 
+ * @author stock
+ *
+ */
 public class SenderThread implements Runnable {
 
   /**
@@ -22,8 +29,16 @@ public class SenderThread implements Runnable {
 
   private ByteBuffer sendingBuffer;
 
-  private List<String> hashes;
+  private final List<String> hashes;
 
+  /**
+   * Default constructor to associate a specific client to the sending
+   * thread. Once the object has been created, the thread can be stared.
+   * 
+   * @param channel to associate where to send the message
+   * @param messageRate rate, per-second, of sending messages
+   * @param hashes stored in linked list to add hash of pay load
+   */
   public SenderThread(SocketChannel channel, int messageRate,
       List<String> hashes) {
     this.channel = channel;
@@ -32,10 +47,17 @@ public class SenderThread implements Runnable {
     this.sendingBuffer = ByteBuffer.allocate( TransmissionUtilities.EIGHT_KB );
   }
 
+  /**
+   * Continuously running to send messages to the server.
+   * 
+   * New messages will be constructed with a random 8 KB array of bytes.
+   * The hash is computed, stored in the linked list of hashes, and then
+   * sent to the server. The buffer is cleared, and a new message
+   * constructed.
+   */
   @Override
   public void run() {
-    int rounds = 10;
-    LOG.debug( Integer.toString( rounds ) + " messages sent." );
+    int rounds = 100; // rounds-- > 0
     while ( rounds-- > 0 )
     {
       byte[] msg = new byte[ TransmissionUtilities.EIGHT_KB ];
@@ -66,5 +88,4 @@ public class SenderThread implements Runnable {
       }
     }
   }
-
 }
