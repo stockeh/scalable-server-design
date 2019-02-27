@@ -7,6 +7,7 @@ import java.nio.channels.SocketChannel;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Timer;
 import cs455.scaling.util.Logger;
 import cs455.scaling.util.TransmissionUtilities;
 
@@ -37,13 +38,15 @@ public class Client {
    * Have the ability to log output INFO, DEBUG, ERROR configured by
    * Logger(INFO, DEBUG) and LOGGER#MASTER for ERROR settings.
    */
-  private static final Logger LOG = new Logger( true, true );
+  private static final Logger LOG = new Logger( true, false );
 
   private List<String> hashes;
 
   private SocketChannel channel;
 
   private ByteBuffer receivingBuffer;
+
+  private final ClientStatistics statistics;
 
   private int received = 0;
 
@@ -62,7 +65,7 @@ public class Client {
       LOG.error( "USAGE: server-host server-port message-rate" );
       return;
     }
-    LOG.info( "Client starting up at: " + new Date() );
+    LOG.info( "Client starting up at: " + new Date() + "\n" );
 
     int serverPort, messageRate;
 
@@ -85,9 +88,13 @@ public class Client {
       LOG.error( "Unable to initialize. " + e.getMessage() );
       return;
     }
-    ( new Thread(
-        new SenderThread( client.channel, messageRate, client.hashes ) ) )
-            .start();
+    ( new Thread( new SenderThread( client.statistics, client.channel,
+        messageRate, client.hashes ) ) ).start();
+
+    Timer timer = new Timer();
+    final int interval = 20000; // 20 seconds in milliseconds
+    timer.schedule( client.statistics, 0, interval );
+
     client.read( messageRate );
   }
 
@@ -108,6 +115,8 @@ public class Client {
     receivingBuffer = ByteBuffer.allocate( TransmissionUtilities.FORTY_B );
 
     hashes = new LinkedList<String>();
+
+    statistics = new ClientStatistics();
   }
 
   /**
@@ -138,6 +147,7 @@ public class Client {
   /**
    * Acknowledge a response (containing a hash code), and remove it from
    * the transmitted hashes if found.
+   * 
    */
   private void acknowledgeResponse() {
     synchronized ( hashes )
@@ -145,6 +155,7 @@ public class Client {
       String response = new String( receivingBuffer.array() ).trim();
       if ( hashes.remove( response ) )
       {
+        statistics.received();
         LOG.debug( Integer.toString( ++received ) + " messages received. "
             + hashes.size() + " hashes." );
       }
