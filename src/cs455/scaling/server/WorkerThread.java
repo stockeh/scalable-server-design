@@ -12,13 +12,13 @@ import cs455.scaling.util.Logger;
  * @author stock
  *
  */
-class WorkerThread extends Thread {
+class WorkerThread implements Runnable {
 
   /**
    * Have the ability to log output INFO, DEBUG, ERROR configured by
    * Logger(INFO, DEBUG) and LOGGER#MASTER for ERROR settings.
    */
-  private static final Logger LOG = new Logger( true, true );
+  private static final Logger LOG = new Logger( true, false );
 
   private final LinkedBlockingQueue<Task> queue;
 

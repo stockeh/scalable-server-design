@@ -11,6 +11,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Timer;
 import cs455.scaling.util.Logger;
 import cs455.scaling.util.TransmissionUtilities;
 
@@ -47,6 +48,8 @@ public class Server {
 
   private List<SocketChannel> clients;
 
+  private final ServerStatistics statistics;
+
   private final int batchSize;
 
   private final int batchTime;
@@ -77,6 +80,11 @@ public class Server {
     Server server = new Server( arguments );
 
     server.threadPoolManager.start();
+
+    Timer timer = new Timer();
+    final int interval = 20000; // 20 seconds in milliseconds
+    timer.schedule( server.statistics, 0, interval );
+
     try
     {
       server.start( arguments[ 0 ] );
@@ -96,6 +104,7 @@ public class Server {
   public Server(int[] arguments) {
     this.data = new LinkedList<byte[]>();
     this.clients = new LinkedList<SocketChannel>();
+    this.statistics = new ServerStatistics();
     this.threadPoolManager = new ThreadPoolManager( arguments[ 1 ] );
     this.batchSize = arguments[ 2 ];
     this.batchTime = arguments[ 3 ];
@@ -164,6 +173,7 @@ public class Server {
 
     if ( bytesRead == -1 )
     {
+      statistics.deregister( client );
       client.close();
       LOG.info( "Client disconnected" );
     } else
@@ -190,11 +200,10 @@ public class Server {
     data.add( buffer.array() );
     clients.add( client );
     // TODO: is it important to have own thread for checking timing?
-    // https://www.geeksforgeeks.org/java-util-timertask-class-java/
     if ( data.size() == batchSize || ( ( int ) Math
         .round( ( System.nanoTime() - initTime ) / 1E9 ) == batchTime ) )
     {
-      Task task = new Task( data, clients );
+      Task task = new Task( statistics, data, clients );
       try
       {
         threadPoolManager.addTask( task );
@@ -222,6 +231,8 @@ public class Server {
     SocketChannel client = serverSocket.accept();
     client.configureBlocking( false );
     client.register( selector, SelectionKey.OP_READ );
+    statistics.register( client );
+
     LOG.info( "New client " + client.getRemoteAddress() + " has registered" );
   }
 }
