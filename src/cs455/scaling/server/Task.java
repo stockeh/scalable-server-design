@@ -25,23 +25,29 @@ public class Task {
    * Have the ability to log output INFO, DEBUG, ERROR configured by
    * Logger(INFO, DEBUG) and LOGGER#MASTER for ERROR settings.
    */
-  private static final Logger LOG = new Logger( true, true );
+  private static final Logger LOG = new Logger( true, false );
 
-  private byte[][] data;
+  private final byte[][] data;
 
-  private SocketChannel[] clients;
+  private final SocketChannel[] clients;
+
+  private final ServerStatistics statistics;
 
   /**
    * Default constructor to build a new task. Data and clients are
    * associated with this task, and will run when a new thread becomes
    * available.
    * 
+   * @param statistics
+   * 
    * @param data a list of <code>byte[]</code> that will be converted to
    *        a <code>byte[][]</code>.
    * @param clients the associated socket channels for each of the
    *        messages.
    */
-  public Task(List<byte[]> data, List<SocketChannel> clients) {
+  public Task(ServerStatistics statistics, List<byte[]> data,
+      List<SocketChannel> clients) {
+    this.statistics = statistics;
     this.data = data
         .toArray( new byte[ data.size() ][ TransmissionUtilities.EIGHT_KB ] );
     data.clear();
@@ -52,7 +58,7 @@ public class Task {
   /**
    * Executes when a new thread becomes available, writing the data back
    * to the respective client. The hash of the each message will be
-   * computed, and sent as the pay load back to the client.  
+   * computed, and sent as the pay load back to the client.
    * 
    * TODO: Does this need to be runnable?
    * 
@@ -68,6 +74,7 @@ public class Task {
       {
         LOG.error( e.getMessage() );
       }
+      statistics.increment( clients[ i ] );
     }
   }
 }

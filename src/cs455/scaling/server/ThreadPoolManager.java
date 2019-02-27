@@ -20,7 +20,7 @@ public class ThreadPoolManager {
 
   private final int numberOfThreads;
 
-  private final WorkerThread[] threads;
+  private final Thread[] threads;
 
   private final LinkedBlockingQueue<Task> queue;
 
@@ -34,11 +34,11 @@ public class ThreadPoolManager {
   public ThreadPoolManager(int numberOfThreads) {
     this.numberOfThreads = numberOfThreads;
     this.queue = new LinkedBlockingQueue<Task>();
-    this.threads = new WorkerThread[ numberOfThreads ];
+    this.threads = new Thread[ numberOfThreads ];
 
     for ( int i = 0; i < numberOfThreads; ++i )
     {
-      threads[ i ] = new WorkerThread( queue, i );
+      threads[ i ] = new Thread( new WorkerThread( queue, i ) );
     }
   }
 
