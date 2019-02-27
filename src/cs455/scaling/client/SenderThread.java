@@ -31,16 +31,20 @@ public class SenderThread implements Runnable {
 
   private final List<String> hashes;
 
+  private final ClientStatistics statistics;
+
   /**
    * Default constructor to associate a specific client to the sending
    * thread. Once the object has been created, the thread can be stared.
+   * @param statistics 
    * 
    * @param channel to associate where to send the message
    * @param messageRate rate, per-second, of sending messages
    * @param hashes stored in linked list to add hash of pay load
    */
-  public SenderThread(SocketChannel channel, int messageRate,
+  public SenderThread(ClientStatistics statistics, SocketChannel channel, int messageRate,
       List<String> hashes) {
+    this.statistics = statistics;
     this.channel = channel;
     this.messageRate = messageRate;
     this.hashes = hashes;
@@ -72,7 +76,7 @@ public class SenderThread implements Runnable {
       try
       {
         channel.write( sendingBuffer );
-
+        statistics.sent();
         sendingBuffer.clear();
       } catch ( IOException e )
       {
