@@ -48,7 +48,11 @@ public class ClientStatistics extends TimerTask {
   public void run() {
     String timestamp =
         String.format( "%1$TF %1$TT", new Timestamp( new Date().getTime() ) );
+    
     System.out.println( "[" + timestamp + "]" + " Total Sent Count: "
         + sent.get() + ", Total Received Count: " + received.get() + "\n");
+    
+    sent.set( 0 );
+    received.set( 0 );
   }
 }

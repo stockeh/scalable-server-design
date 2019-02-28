@@ -233,6 +233,6 @@ public class Server {
     client.register( selector, SelectionKey.OP_READ );
     statistics.register( client );
 
-    LOG.info( "New client " + client.getRemoteAddress() + " has registered" );
+    LOG.debug( "New client " + client.getRemoteAddress() + " has registered" );
   }
 }
