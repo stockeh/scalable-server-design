@@ -2,6 +2,8 @@ package cs455.scaling.server;
 
 import java.nio.channels.SocketChannel;
 import java.sql.Timestamp;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.Date;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
@@ -86,13 +88,30 @@ public class ServerStatistics extends TimerTask {
 
       double activeClients = map.size();
 
-      double mean =
-          ( activeClients != 0 ) ? totalPerSecond / activeClients
-              : 0;
+      double mean = 0;
+      double std = 0;
+      if ( activeClients != 0 )
+      {
+        mean = totalPerSecond / activeClients;
+
+        double temp = 0;
+        double scaledMean = mean * 20;
+        for ( LongAdder val : map.values() )
+        {
+          int value = val.intValue();
+          temp += ( value - scaledMean ) * ( value - scaledMean );
+        }
+
+        std = Math.sqrt( temp / ( activeClients - 1 ) );
+      }
+      NumberFormat formatter = new DecimalFormat( "#0.00" );
 
       System.out.println( "[" + timestamp + "]" + " Server Throughput: "
-          + totalPerSecond + ", Active Client Connections: " + map.size()
-          + ", Mean Per-client Throughput: " + mean + "\n" );
+          + formatter.format( totalPerSecond )
+          + " message(s), Active Client Connections: " + map.size()
+          + ", Mean Per-client Throughput: " + formatter.format( mean )
+          + " message(s), Std. Dev. Of Per-client Throughput: "
+          + formatter.format( std ) + "\n" );
 
       // Reset all active clients to have sent zero messages.
       map.replaceAll( (k, v) -> new LongAdder() );

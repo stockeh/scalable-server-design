@@ -1,6 +1,7 @@
 package cs455.scaling.server;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
@@ -124,11 +125,13 @@ public class Server {
    */
   private void start(int port) throws IOException {
     Selector selector = Selector.open();
-    // TODO: Use the actual host
-    // String host = InetAddress.getLocalHost().getHostName();
-    String host = "localhost";
+    String host = InetAddress.getLocalHost().getHostName();
+    
+    LOG.info( "Server starting on host: " + host + ", port: "
+        + Integer.toString( port ) );
+    
     ServerSocketChannel serverSocket = ServerSocketChannel.open();
-    serverSocket.bind( new InetSocketAddress( host, 5001 ) );
+    serverSocket.bind( new InetSocketAddress( host, port ) );
     serverSocket.configureBlocking( false );
 
     serverSocket.register( selector, SelectionKey.OP_ACCEPT );
