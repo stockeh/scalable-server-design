@@ -1,4 +1,4 @@
-HOST=localhost
+HOST=Jasons-MacBook-Pro.local
 PORT=5001
 RATE=3
 
