@@ -39,7 +39,11 @@ public class Receiver implements Task {
     ByteBuffer buffer = ByteBuffer.allocate( TransmissionUtilities.EIGHT_KB );
 
     SocketChannel client = ( SocketChannel ) key.channel();
-    int bytesRead = client.read( buffer );
+    int bytesRead = 0;
+    while ( buffer.hasRemaining() && bytesRead != -1 )
+    {
+      bytesRead = client.read( buffer );
+    }
 
     if ( bytesRead == -1 )
     {
