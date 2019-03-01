@@ -7,6 +7,17 @@ import java.nio.channels.SocketChannel;
 import cs455.scaling.util.Logger;
 import cs455.scaling.util.TransmissionUtilities;
 
+/**
+ * Processes data as received from the clients.
+ * 
+ * The server will check a set of SelectionKeys, and upon one being
+ * readable, a new receiver will be made to manage that data. In turn
+ * adding the data to a collection of buffered data received from all
+ * clients in the system.
+ * 
+ * @author stock
+ *
+ */
 public class Receiver implements Task {
 
   /**

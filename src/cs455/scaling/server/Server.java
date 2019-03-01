@@ -98,7 +98,7 @@ public class Server {
    * socket channel, and begin accepting new connections.
    * 
    * This method will continuously run accepting new connections, and
-   * reading messages.
+   * reading messages. These actions are managed by the thread pool.
    * 
    * @param port specifies the port to which the server socket channel
    *        will be listening.

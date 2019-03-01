@@ -97,6 +97,8 @@ public class ThreadPoolManager {
       try
       {
         addTask( sender );
+        buffer.clear();
+        clients.clear();
       } catch ( InterruptedException e )
       {
         LOG.error(
