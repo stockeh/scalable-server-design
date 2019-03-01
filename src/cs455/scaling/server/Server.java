@@ -3,18 +3,14 @@ package cs455.scaling.server;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.Date;
 import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Timer;
 import cs455.scaling.util.Logger;
-import cs455.scaling.util.TransmissionUtilities;
 
 /**
  * Only one server node in the system to manage incoming connections /
@@ -45,17 +41,7 @@ public class Server {
 
   private final ThreadPoolManager threadPoolManager;
 
-  private List<byte[]> data;
-
-  private List<SocketChannel> clients;
-
   private final ServerStatistics statistics;
-
-  private final int batchSize;
-
-  private final int batchTime;
-
-  private long initTime;
 
   /**
    * Entry point for the server, specifying the configuration via the
@@ -89,7 +75,7 @@ public class Server {
     try
     {
       server.start( arguments[ 0 ] );
-    } catch ( NumberFormatException | IOException e )
+    } catch ( NumberFormatException | IOException | InterruptedException e )
     {
       LOG.error( "Unable to initialize. " + e.getMessage() );
       return;
@@ -103,13 +89,8 @@ public class Server {
    * @param arguments
    */
   public Server(int[] arguments) {
-    this.data = new LinkedList<byte[]>();
-    this.clients = new LinkedList<SocketChannel>();
     this.statistics = new ServerStatistics();
-    this.threadPoolManager = new ThreadPoolManager( arguments[ 1 ] );
-    this.batchSize = arguments[ 2 ];
-    this.batchTime = arguments[ 3 ];
-    this.initTime = System.nanoTime();
+    this.threadPoolManager = new ThreadPoolManager( arguments, statistics );
   }
 
   /**
@@ -122,14 +103,15 @@ public class Server {
    * @param port specifies the port to which the server socket channel
    *        will be listening.
    * @throws IOException
+   * @throws InterruptedException
    */
-  private void start(int port) throws IOException {
+  private void start(int port) throws IOException, InterruptedException {
     Selector selector = Selector.open();
     String host = InetAddress.getLocalHost().getHostName();
-    
+
     LOG.info( "Server starting on host: " + host + ", port: "
         + Integer.toString( port ) );
-    
+
     ServerSocketChannel serverSocket = ServerSocketChannel.open();
     serverSocket.bind( new InetSocketAddress( host, port ) );
     serverSocket.configureBlocking( false );
@@ -152,73 +134,13 @@ public class Server {
 
         if ( key.isReadable() )
         {
-          read( key );
+          key.interestOps( SelectionKey.OP_WRITE );
+          threadPoolManager
+              .addTask( new Receiver( threadPoolManager, statistics, key ) );
         }
         iter.remove();
       }
     }
-  }
-
-  /**
-   * Read incoming messages from a given channel, check if the client
-   * has disconnected, or if there is data to be process.
-   * 
-   * @param key a token representing the registration of a
-   *        SelectableChannel with a Selector.
-   * @throws IOException
-   */
-  private void read(SelectionKey key) throws IOException {
-
-    ByteBuffer buffer = ByteBuffer.allocate( TransmissionUtilities.EIGHT_KB );
-
-    SocketChannel client = ( SocketChannel ) key.channel();
-    int bytesRead = client.read( buffer );
-
-    if ( bytesRead == -1 )
-    {
-      statistics.deregister( client );
-      client.close();
-      LOG.info( "Client disconnected" );
-    } else
-    {
-      LOG.debug( "Received: "
-          + TransmissionUtilities.SHA1FromBytes( buffer.array() ) );
-      process( buffer, client );
-    }
-  }
-
-  /**
-   * Synchronized method to process incoming messages from a given
-   * client. The data that was read into the buffer, and its respective
-   * client is added to a linked list. A new task is created and added
-   * to a queue for the thread pool manager to process with the data and
-   * client information.
-   * 
-   * @param buffer containing the data pay load that is to be converted
-   *        to a <code>byte[]</byte>.
-   * @param client connection information for where to send the data
-   *        back to.
-   */
-  private synchronized void process(ByteBuffer buffer, SocketChannel client) {
-    data.add( buffer.array() );
-    clients.add( client );
-    // TODO: is it important to have own thread for checking timing?
-    if ( data.size() == batchSize || ( ( int ) Math
-        .round( ( System.nanoTime() - initTime ) / 1E9 ) == batchTime ) )
-    {
-      Task task = new Task( statistics, data, clients );
-      try
-      {
-        threadPoolManager.addTask( task );
-      } catch ( InterruptedException e )
-      {
-        LOG.error(
-            "Unable to add task to thread pool queue. " + e.getMessage() );
-      }
-      initTime = System.nanoTime();
-    }
-    LOG.debug( "Unit Size: " + data.size() );
-    buffer.clear();
   }
 
   /**

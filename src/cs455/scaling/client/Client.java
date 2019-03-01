@@ -48,8 +48,6 @@ public class Client {
 
   private final ClientStatistics statistics;
 
-  private int received = 0;
-
   /**
    * Driver method to setup a new client.
    * 
@@ -156,8 +154,10 @@ public class Client {
       if ( hashes.remove( response ) )
       {
         statistics.received();
-        LOG.debug( Integer.toString( ++received ) + " messages received. "
-            + hashes.size() + " hashes." );
+      } else
+      {
+        LOG.error( "Unable to remove the response: " + response
+            + ", because it was not found." );
       }
     }
   }

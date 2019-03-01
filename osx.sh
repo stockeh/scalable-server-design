@@ -1,9 +1,9 @@
 HOST=Jasons-MacBook-Pro.local
 PORT=5001
-RATE=3
+RATE=10
 
-POOL_SIZE=10
-BATCH_SIZE=20
+POOL_SIZE=8
+BATCH_SIZE=30
 BATCH_TIME=5
 
 DIR="$( cd "$( dirname "$0" )" && pwd )"
@@ -28,7 +28,7 @@ LINES=`find . -name "*.java" -print | xargs wc -l | grep "total" | awk '{$1=$1};
     open -a Terminal .
     pushd $BUILD; java -cp . cs455.scaling.server.Server $PORT $POOL_SIZE $BATCH_SIZE $BATCH_TIME; popd;
 else
-    for tab in {1..10}
+    for tab in {1..20}
     do
         new_tab
     done
