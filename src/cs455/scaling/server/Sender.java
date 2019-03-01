@@ -8,7 +8,8 @@ import cs455.scaling.util.Logger;
 import cs455.scaling.util.TransmissionUtilities;
 
 /**
- * New tasks will send data back to the clients.
+ * New tasks, containing a list of data, will be processed and sent
+ * back to the clients.
  * 
  * A task contains the data and the respective clients for where to
  * respond to data. When a new thread is available in thread pool
@@ -17,7 +18,7 @@ import cs455.scaling.util.TransmissionUtilities;
  * @author stock
  *
  */
-public class Sender implements Task{
+public class Sender implements Task {
 
   /**
    * Have the ability to log output INFO, DEBUG, ERROR configured by
@@ -48,9 +49,7 @@ public class Sender implements Task{
     this.statistics = statistics;
     this.data = data
         .toArray( new byte[ data.size() ][ TransmissionUtilities.EIGHT_KB ] );
-    data.clear();
     this.clients = clients.toArray( new SocketChannel[ clients.size() ] );
-    clients.clear();
   }
 
   /**

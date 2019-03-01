@@ -44,8 +44,6 @@ public class Client {
 
   private SocketChannel channel;
 
-  private ByteBuffer receivingBuffer;
-
   private final ClientStatistics statistics;
 
   /**
@@ -110,8 +108,6 @@ public class Client {
     channel =
         SocketChannel.open( new InetSocketAddress( serverHost, serverPort ) );
 
-    receivingBuffer = ByteBuffer.allocate( TransmissionUtilities.FORTY_B );
-
     hashes = new LinkedList<String>();
 
     statistics = new ClientStatistics();
@@ -121,18 +117,19 @@ public class Client {
    * Continuously try to read from the socket channel into the received
    * buffer. New messages are acknowledged.
    * 
-   * TODO: Does this need to be synchronized?
-   * 
    * @param messageRate
    */
   private void read(int messageRate) {
+    ByteBuffer receivingBuffer =
+        ByteBuffer.allocate( TransmissionUtilities.FORTY_B );
+
     while ( true )
     {
       try
       {
         channel.read( receivingBuffer );
 
-        acknowledgeResponse();
+        acknowledgeResponse( receivingBuffer );
 
         receivingBuffer.clear();
       } catch ( IOException e )
@@ -146,8 +143,9 @@ public class Client {
    * Acknowledge a response (containing a hash code), and remove it from
    * the transmitted hashes if found.
    * 
+   * @param receivingBuffer contains the hash value
    */
-  private void acknowledgeResponse() {
+  private void acknowledgeResponse(ByteBuffer receivingBuffer) {
     synchronized ( hashes )
     {
       String response = new String( receivingBuffer.array() ).trim();
