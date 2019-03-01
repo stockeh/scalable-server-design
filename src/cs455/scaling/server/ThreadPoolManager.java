@@ -1,5 +1,8 @@
 package cs455.scaling.server;
 
+import java.nio.channels.SocketChannel;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 import cs455.scaling.util.Logger;
 
@@ -18,23 +21,42 @@ public class ThreadPoolManager {
    */
   private static final Logger LOG = new Logger( true, true );
 
-  private final int numberOfThreads;
-
   private final Thread[] threads;
 
   private final LinkedBlockingQueue<Task> queue;
+  
+  private final List<byte[]> buffer;
+  
+  private final List<SocketChannel> clients;
+
+  private long initTime;
+
+  private final int batchSize;
+
+  private final int batchTime;
+
+  private final ServerStatistics statistics;
+  
 
   /**
    * Default constructor that is to be created only once along with the
    * server. A specified number of threads are created that will hold a
    * reference to the queue.
    * 
-   * @param numberOfThreads
+   * @param arguments
+   * @param statistics 
    */
-  public ThreadPoolManager(int numberOfThreads) {
-    this.numberOfThreads = numberOfThreads;
-    this.queue = new LinkedBlockingQueue<Task>();
+  public ThreadPoolManager(int[] arguments, ServerStatistics statistics) {
+    final int numberOfThreads = arguments[1];
     this.threads = new Thread[ numberOfThreads ];
+    this.queue = new LinkedBlockingQueue<Task>();
+    this.buffer = new LinkedList<byte[]>();
+    this.clients = new LinkedList<SocketChannel>();
+    
+    this.statistics = statistics;
+    this.initTime = System.nanoTime();
+    this.batchSize = arguments[ 2 ];
+    this.batchTime = arguments[ 3 ];
 
     for ( int i = 0; i < numberOfThreads; ++i )
     {
@@ -49,7 +71,7 @@ public class ThreadPoolManager {
    * 
    */
   public void start() {
-    for ( int i = 0; i < numberOfThreads; ++i )
+    for ( int i = 0; i < threads.length; ++i )
     {
       threads[ i ].start();
     }
@@ -64,4 +86,24 @@ public class ThreadPoolManager {
   public void addTask(Task task) throws InterruptedException {
     queue.put( task );
   }
+  
+  public synchronized void addUnit(byte[] payload, SocketChannel client) {
+    buffer.add( payload );
+    clients.add( client );
+    if ( buffer.size() == batchSize || ( ( int ) Math
+        .round( ( System.nanoTime() - initTime ) / 1E9 ) == batchTime ) )
+    {
+      Sender sender = new Sender( statistics, buffer, clients );
+      try
+      {
+        addTask( sender );
+      } catch ( InterruptedException e )
+      {
+        LOG.error(
+            "Unable to add task to thread pool queue. " + e.getMessage() );
+      }
+      initTime = System.nanoTime();
+    }
+  }
+  
 }

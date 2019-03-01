@@ -88,11 +88,11 @@ public class ServerStatistics extends TimerTask {
 
       double activeClients = map.size();
 
-      double mean = 0;
+      double mean = totalPerSecond;
       double std = 0;
-      if ( activeClients != 0 )
+      if ( activeClients > 1 )
       {
-        mean = totalPerSecond / activeClients;
+        mean /= activeClients;
 
         double temp = 0;
         double scaledMean = mean * 20;
@@ -102,7 +102,7 @@ public class ServerStatistics extends TimerTask {
           temp += ( value - scaledMean ) * ( value - scaledMean );
         }
 
-        std = Math.sqrt( temp / ( activeClients - 1 ) );
+        std = Math.sqrt( temp / ( activeClients - 1.0 ) );
       }
       NumberFormat formatter = new DecimalFormat( "#0.00" );
 
