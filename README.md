@@ -1,7 +1,7 @@
 # Distributed Computing
 **Using Thread Pools & Micro Batching to Manage and Load Balance Active Network Connections**  
 
-This project focuses on developing a server to handle network traffic by designing a custom tread pool. This thread pool is configurable to manage a number of threads that will be used to perform tasks relating to network communications. This includes:  
+This project focuses on developing a server to handle network traffic with the design of a custom tread pool. This thread pool is configurable to manage a number of threads that will be used to perform tasks relating to network communications. This includes:  
 
 - Managing incoming network connections
 - Receiving data over these network connections
