@@ -61,7 +61,6 @@ public class SenderThread implements Runnable {
    */
   @Override
   public void run() {
-    // int rounds = 10; // rounds-- > 0
     while ( true )
     {
       byte[] msg = new byte[ TransmissionUtilities.EIGHT_KB ];

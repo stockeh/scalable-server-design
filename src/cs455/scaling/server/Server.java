@@ -6,10 +6,11 @@ import java.net.InetSocketAddress;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
-import java.nio.channels.SocketChannel;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Timer;
+import cs455.scaling.server.task.Receiver;
+import cs455.scaling.server.task.Register;
 import cs455.scaling.util.Logger;
 
 /**
@@ -31,7 +32,7 @@ import cs455.scaling.util.Logger;
  * @author stock
  *
  */
-public class Server {
+class Server {
 
   /**
    * Have the ability to log output INFO, DEBUG, ERROR configured by
@@ -70,12 +71,12 @@ public class Server {
 
     Timer timer = new Timer();
     final int interval = 20000; // 20 seconds in milliseconds
-    timer.schedule( server.statistics, 0, interval );
+    timer.schedule( server.statistics, 1000, interval );
 
     try
     {
       server.start( arguments[ 0 ] );
-    } catch ( NumberFormatException | IOException | InterruptedException e )
+    } catch ( NumberFormatException | IOException e )
     {
       LOG.error( "Unable to initialize. " + e.getMessage() );
       return;
@@ -88,7 +89,7 @@ public class Server {
    * 
    * @param arguments
    */
-  public Server(int[] arguments) {
+  private Server(int[] arguments) {
     this.statistics = new ServerStatistics();
     this.threadPoolManager = new ThreadPoolManager( arguments, statistics );
   }
@@ -97,15 +98,11 @@ public class Server {
    * Once the server object is configured, it can set up a new server
    * socket channel, and begin accepting new connections.
    * 
-   * This method will continuously run accepting new connections, and
-   * reading messages. These actions are managed by the thread pool.
-   * 
    * @param port specifies the port to which the server socket channel
    *        will be listening.
    * @throws IOException
-   * @throws InterruptedException
    */
-  private void start(int port) throws IOException, InterruptedException {
+  private void start(int port) throws IOException {
     Selector selector = Selector.open();
     String host = InetAddress.getLocalHost().getHostName();
 
@@ -118,6 +115,28 @@ public class Server {
 
     serverSocket.register( selector, SelectionKey.OP_ACCEPT );
 
+    try
+    {
+      process( selector, serverSocket );
+    } catch ( InterruptedException e )
+    {
+      LOG.error( "Failed to receive messages. Exiting application with error: "
+          + e.getMessage() );
+      return;
+    }
+  }
+
+  /**
+   * This method will continuously run accepting new connections, and
+   * reading messages. These actions are managed by the thread pool.
+   * 
+   * @param selector
+   * @param serverSocket
+   * @throws IOException
+   * @throws InterruptedException
+   */
+  private void process(Selector selector, ServerSocketChannel serverSocket)
+      throws IOException, InterruptedException {
     while ( true )
     {
       selector.select();
@@ -127,37 +146,20 @@ public class Server {
 
         SelectionKey key = iter.next();
 
-        if ( key.isAcceptable() )
+        if ( key.isAcceptable() && key.attachment() == null )
         {
-          register( selector, serverSocket );
+          key.attach( statistics );
+          threadPoolManager
+              .addTask( new Register( selector, serverSocket, key ) );
         }
 
-        if ( key.isReadable() )
+        else if ( key.isReadable() && key.attachment() == null )
         {
-          key.interestOps( SelectionKey.OP_WRITE );
-          threadPoolManager
-              .addTask( new Receiver( threadPoolManager, statistics, key ) );
+          key.attach( statistics );
+          threadPoolManager.addTask( new Receiver( threadPoolManager, key ) );
         }
         iter.remove();
       }
     }
-  }
-
-  /**
-   * Invoked upon a new client registering itself with the server.
-   * 
-   * @param selector
-   * @param serverSocket
-   * @throws IOException
-   */
-  private void register(Selector selector, ServerSocketChannel serverSocket)
-      throws IOException {
-
-    SocketChannel client = serverSocket.accept();
-    client.configureBlocking( false );
-    client.register( selector, SelectionKey.OP_READ );
-    statistics.register( client );
-
-    LOG.debug( "New client " + client.getRemoteAddress() + " has registered" );
   }
 }

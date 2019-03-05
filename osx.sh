@@ -28,7 +28,7 @@ LINES=`find . -name "*.java" -print | xargs wc -l | grep "total" | awk '{$1=$1};
     open -a Terminal .
     pushd $BUILD; java -cp . cs455.scaling.server.Server $PORT $POOL_SIZE $BATCH_SIZE $BATCH_TIME; popd;
 else
-    for tab in {1..10}
+    for tab in {1..5}
     do
         new_tab
     done

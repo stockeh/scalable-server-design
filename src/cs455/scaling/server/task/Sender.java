@@ -1,9 +1,10 @@
-package cs455.scaling.server;
+package cs455.scaling.server.task;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.util.List;
+import cs455.scaling.server.ServerStatistics;
 import cs455.scaling.util.Logger;
 import cs455.scaling.util.TransmissionUtilities;
 
@@ -63,14 +64,18 @@ public class Sender implements Task {
     for ( int i = 0; i < data.length; ++i )
     {
       String hash = TransmissionUtilities.SHA1FromBytes( data[ i ] );
+      SocketChannel client = clients[i];
       try
       {
-        clients[ i ].write( ByteBuffer.wrap( hash.getBytes() ) );
+        client.write( ByteBuffer.wrap( hash.getBytes() ) );
       } catch ( IOException e )
       {
-        LOG.error( e.getMessage() );
+        statistics.deregister( client );
+        LOG.error( "Unable to write to client: " + e.getMessage()
+            + ", deregistering client." );
+        return;
       }
-      statistics.increment( clients[ i ] );
+      statistics.increment( client );
     }
   }
 }
