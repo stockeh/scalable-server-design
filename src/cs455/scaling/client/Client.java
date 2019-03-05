@@ -88,7 +88,7 @@ public class Client {
         messageRate, client.hashes ) ) ).start();
 
     Timer timer = new Timer();
-    final int interval = 20000; // 20 seconds in milliseconds
+    final int interval = 200000; // 20 seconds in milliseconds
     timer.schedule( client.statistics, 0, interval );
 
     client.read( messageRate );

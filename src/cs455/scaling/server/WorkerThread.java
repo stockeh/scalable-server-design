@@ -1,6 +1,5 @@
 package cs455.scaling.server;
 
-import java.io.IOException;
 import java.util.concurrent.LinkedBlockingQueue;
 import cs455.scaling.util.Logger;
 
@@ -61,9 +60,9 @@ class WorkerThread implements Runnable {
         LOG.debug(
             "Thread: " + Integer.toString( identifier ) + " is executing." );
         task.process();
-      } catch ( RuntimeException | IOException e )
+      } catch ( RuntimeException e )
       {
-        System.out.println(
+        LOG.error(
             "Thread pool is interrupted due to an issue: " + e.getMessage() );
       }
     }

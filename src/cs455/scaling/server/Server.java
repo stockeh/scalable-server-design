@@ -69,7 +69,7 @@ public class Server {
     server.threadPoolManager.start();
 
     Timer timer = new Timer();
-    final int interval = 20000; // 20 seconds in milliseconds
+    final int interval = 200000; // 20 seconds in milliseconds
     timer.schedule( server.statistics, 0, interval );
 
     try
@@ -131,12 +131,10 @@ public class Server {
         {
           register( selector, serverSocket );
         }
-
-        if ( key.isReadable() )
+        if ( key.isReadable() && key.attachment() == null )
         {
-          key.interestOps( SelectionKey.OP_WRITE );
-          threadPoolManager
-              .addTask( new Receiver( threadPoolManager, statistics, key ) );
+          key.attach( new Object() );
+          threadPoolManager.addUnit( key );
         }
         iter.remove();
       }

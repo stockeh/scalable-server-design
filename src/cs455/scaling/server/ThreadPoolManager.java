@@ -1,6 +1,6 @@
 package cs455.scaling.server;
 
-import java.nio.channels.SocketChannel;
+import java.nio.channels.SelectionKey;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -25,10 +25,8 @@ public class ThreadPoolManager {
 
   private final LinkedBlockingQueue<Task> queue;
   
-  private final List<byte[]> buffer;
+  private final List<SelectionKey> buffer;
   
-  private final List<SocketChannel> clients;
-
   private long initTime;
 
   private final int batchSize;
@@ -50,8 +48,7 @@ public class ThreadPoolManager {
     final int numberOfThreads = arguments[1];
     this.threads = new Thread[ numberOfThreads ];
     this.queue = new LinkedBlockingQueue<Task>();
-    this.buffer = new LinkedList<byte[]>();
-    this.clients = new LinkedList<SocketChannel>();
+    this.buffer = new LinkedList<SelectionKey>();
     
     this.statistics = statistics;
     this.initTime = System.nanoTime();
@@ -76,29 +73,19 @@ public class ThreadPoolManager {
       threads[ i ].start();
     }
   }
-
-  /**
-   * When a new task is created, it is added to the tail of the queue.
-   * 
-   * @param task
-   * @throws InterruptedException
-   */
-  public void addTask(Task task) throws InterruptedException {
-    queue.put( task );
-  }
   
-  public synchronized void addUnit(byte[] payload, SocketChannel client) {
-    buffer.add( payload );
-    clients.add( client );
+  public synchronized void addUnit(SelectionKey key) {
+    buffer.add( key );
+    key.attach( null );
+
     if ( buffer.size() == batchSize || ( ( int ) Math
-        .round( ( System.nanoTime() - initTime ) / 1E9 ) == batchTime ) )
+        .round( ( System.nanoTime() - initTime ) / 1E9 ) >= batchTime ) )
     {
-      Sender sender = new Sender( statistics, buffer, clients );
+      Task task = new Task( statistics, buffer );
       try
       {
-        addTask( sender );
+        queue.put( task );
         buffer.clear();
-        clients.clear();
       } catch ( InterruptedException e )
       {
         LOG.error(
