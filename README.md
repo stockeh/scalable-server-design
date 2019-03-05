@@ -8,7 +8,7 @@ This project focuses on developing a server to handle network traffic with the d
 - Organizing data into batches to improve performance
 - Sending data over any of these links  
 
-A thread pool manager maintains list of the work that needs to be performed by the threads. It maintains these work units in a FIFO queue implemented using a linked blocking queue. Each unit of work is either a new connection to establish, a connection to read in data, or a list of data packets with a maximum length of **batch-size**. Work units are added to the tail of the work queue when either: (1) a client is attempting to send data to be read, (2) the intermediary data queue has reached a length of **batch-size** or (3) a **batch-time** has expired since the previous unit was processedA. An available worker thread is assigned to the work unit when an item is available in the queue.    
+A thread pool manager maintains list of the work that needs to be performed by the threads. It maintains these work units in a FIFO queue implemented using a linked blocking queue. Each unit of work is either a new connection to establish, a connection to read in data, or a list of data packets with a maximum length of **batch-size**. Work units are added to the tail of the work queue when either: (1) a client is attempting to send data to be read, (2) the intermediary data queue has reached a length of **batch-size** or (3) a **batch-time** has expired since the previous unit was processed. An available worker thread is assigned to the work unit when an item is available in the queue.    
 
 The high level architectural diagram outlining this process can be seen below.
 
