@@ -1,4 +1,4 @@
-package cs455.scaling.server;
+package cs455.scaling.server.task;
 
 import java.io.IOException;
 
@@ -11,7 +11,7 @@ import java.io.IOException;
  * @author stock
  *
  */
-interface Task {
+public interface Task {
 
   /**
    * Main method that will be invoked when a working thread grabs a new
@@ -19,6 +19,6 @@ interface Task {
    * 
    * @throws IOException
    */
-  public void process() throws IOException;
+  public void process();
 
 }

@@ -89,7 +89,7 @@ public class Client {
 
     Timer timer = new Timer();
     final int interval = 20000; // 20 seconds in milliseconds
-    timer.schedule( client.statistics, 0, interval );
+    timer.schedule( client.statistics, 1000, interval );
 
     client.read( messageRate );
   }

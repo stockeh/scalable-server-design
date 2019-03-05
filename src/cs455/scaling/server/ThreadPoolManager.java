@@ -4,6 +4,8 @@ import java.nio.channels.SocketChannel;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
+import cs455.scaling.server.task.Sender;
+import cs455.scaling.server.task.Task;
 import cs455.scaling.util.Logger;
 
 /**
@@ -91,7 +93,7 @@ public class ThreadPoolManager {
     buffer.add( payload );
     clients.add( client );
     if ( buffer.size() == batchSize || ( ( int ) Math
-        .round( ( System.nanoTime() - initTime ) / 1E9 ) == batchTime ) )
+        .round( ( System.nanoTime() - initTime ) / 1E9 ) >= batchTime ) )
     {
       Sender sender = new Sender( statistics, buffer, clients );
       try
