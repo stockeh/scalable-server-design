@@ -1,6 +1,5 @@
 package cs455.scaling.server;
 
-import java.io.IOException;
 import java.util.concurrent.LinkedBlockingQueue;
 import cs455.scaling.server.task.Task;
 import cs455.scaling.util.Logger;
