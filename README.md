@@ -51,7 +51,7 @@ Gradle is used for build automation, and can be executing manually with ```gradl
 * ```java cs455.scaling.server.Server server-port thread-pool-size batch-size batch-time```
 * ```java cs455.scaling.client.Client server-host server-port message-rate```  
 
-Once the server is started on the `server-host`, multiple clients can be instantiated on multiple or single machine. Java NIO is used to manage connections between the clients and server. To simplify the process of instantiating multiple instances, one of the provided run scripts can be used.  The `osx.sh` script is designed to be executed on MacOS, and the `run.sh` script is used for Linux (but configured to run in the lab at Colorado State University). Execution of the two scripts are nearly identical, but with subtle differences.
+Once the server is started on the `server-host`, multiple clients can be instantiated on multiple or a single machine. Java NIO is used to manage connections between the clients and server. To simplify the process of instantiating multiple instances, one of the provided run scripts can be used.  The `osx.sh` script is designed to be executed on MacOS, and the `run.sh` script is used for Linux (but configured to run in the lab at Colorado State University). Execution of the two scripts are nearly identical, but with subtle differences.
 
 Within each of these scripts, it is possible to configure the **server-host**, **server-port**, **thread-pool-size**, **batch-size**, **batch-time**, and **messaging-rate** for the clients and server.  It is important that the server.  
 
@@ -93,12 +93,12 @@ At this point, there will be two terminals open; one dedicated to the server, an
 ### Linux
 Open up a terminal in the working directory of the project. The configuration can be set within the `run.sh` script by changing the following variables:
 ```console
-HOST=mars
+HOST=indianapolis
 PORT=5001
-RATE=10
+RATE=5
 
-POOL_SIZE=8
-BATCH_SIZE=30
+POOL_SIZE=10
+BATCH_SIZE=100
 BATCH_TIME=5
 ```
 

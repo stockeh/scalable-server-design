@@ -4,9 +4,9 @@ import java.io.IOException;
 
 /**
  * Public interface to delegate tasks to available working threads.
- * This can include reading new data from clients via the
- * {@link Reader}, and sending data back to clients with the
- * {@link Sender}.
+ * This can include; registering new clients via {@link Receiver},
+ * reading data from clients via the {@link Reader}, and sending data
+ * back to clients with the {@link Sender}.
  * 
  * @author stock
  *
