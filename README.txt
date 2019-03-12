@@ -50,10 +50,14 @@ these values, but can be changed.
 
 	2. Add or remove desired clients to the application. Each machine should be on a new line, and can all be
 	   unique or the same. Default is 25 machines
-
+		
 		vim machine_list
+	
+	3. Build the project using gradle
 
-	3. Using the terminal, execute the run script to start the server and clients. (Optional) add an argument,
+		gradle build
+
+	4. Using the terminal, execute the run script to start the server and clients. (Optional) add an argument,
  	   integer, to launch more than one instance on a given host.
 
 		./run.sh 2
@@ -65,10 +69,6 @@ gnome-terminal with tabs for each client instance.
 ——————NOTES——————
 
 - The message-rate must be a a valid integer equal to or greater than 1.
-
-- The project can manually be built with 'gradle clean; gradle build'. The build/ directory may need to be deleted
-  prior to building if not cleaned. Comment out the associated gradle commands in the 'Build Project' section of
-  the run script to avoid rebuilding project.
 
 ——————STRUCTURE——————
 

@@ -106,7 +106,12 @@ Add or remove desired client machines to the application. Each machine should be
 vim machine_list
 ```
 
-Using the terminal, execute the run script to start the server and clients. (Optional) add an argument, integer, to launch more than one instance on a given host.
+Using the terminal, build the project using gradle. This is done with:
+```console
+gradle build
+```
+
+Now, execute the run script to start the server and clients. (Optional) add an argument, integer, to launch more than one instance on a given host.
 ```console
 mars:scalable-server-design$ ./run.sh
 Project has 1110 total lines

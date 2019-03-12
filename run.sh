@@ -21,11 +21,11 @@ POOL_SIZE=10
 BATCH_SIZE=50
 BATCH_TIME=5
 
-## Build Project
+## Build Project (optional)
 
 LINES=`find . -name "*.java" -print | xargs wc -l | grep "total" | awk '{$1=$1};1'`
 echo Project has "$LINES" lines
-gradle clean; gradle build
+# rm -r build; gradle clean; gradle build
 
 ## Launch Server
 
