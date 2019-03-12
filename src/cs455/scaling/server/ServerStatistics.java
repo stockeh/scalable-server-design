@@ -102,9 +102,9 @@ public class ServerStatistics extends TimerTask {
           temp += ( value - scaledMean ) * ( value - scaledMean );
         }
 
-        std = Math.sqrt( temp / ( activeClients - 1.0 ) );
+        std = Math.sqrt( temp / ( activeClients ) );
       }
-      NumberFormat formatter = new DecimalFormat( "#0.00" );
+      NumberFormat formatter = new DecimalFormat( "#0.000" );
 
       System.out.println( "[" + timestamp + "]" + " Server Throughput: "
           + formatter.format( totalPerSecond )
