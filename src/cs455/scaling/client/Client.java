@@ -1,7 +1,9 @@
 package cs455.scaling.client;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.util.Date;
@@ -61,7 +63,16 @@ public class Client {
       LOG.error( "USAGE: server-host server-port message-rate" );
       return;
     }
-    LOG.info( "Client starting up at: " + new Date() + "\n" );
+    String host = "";
+    try
+    {
+      host = InetAddress.getLocalHost().getHostName();
+    } catch ( UnknownHostException e )
+    {
+      LOG.error( "Unable to resolve host name - no functional implications" );
+    }
+    LOG.info(
+        "Client starting up at: " + new Date() + " - on host: " + host + "\n" );
 
     int serverPort, messageRate;
 
