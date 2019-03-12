@@ -66,6 +66,9 @@ gnome-terminal with tabs for each client instance.
 
 - The message-rate must be a a valid integer equal to or greater than 1.
 
+- The project can manually be built with 'gradle clean; gradle build'. The build/ directory may need to be deleted
+  prior to building if not cleaned. Comment out the associated gradle commands in the 'Build Project' section of
+  the run script to avoid rebuilding project.
 
 ——————STRUCTURE——————
 
