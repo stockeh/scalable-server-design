@@ -25,7 +25,7 @@ BATCH_TIME=5
 
 LINES=`find . -name "*.java" -print | xargs wc -l | grep "total" | awk '{$1=$1};1'`
 echo Project has "$LINES" lines
-# rm -r build; gradle clean; gradle build
+rm -r build; gradle clean; gradle build
 
 ## Launch Server
 

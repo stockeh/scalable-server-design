@@ -3,11 +3,12 @@
 
 This project focuses on developing a server to handle network traffic with the design of a custom tread pool. This thread pool is configurable to manage a number of threads that will be used to perform tasks relating to network communications. This includes:  
 
+- Managing incoming network connections
 - Receiving data over these network connections
 - Organizing data into batches to improve performance
 - Sending data over any of these links  
 
-A thread pool manager maintains list of the work that needs to be performed by the threads. It maintains these work units in a FIFO queue implemented using a linked blocking queue. Each unit of work is either a new connection to establish, a connection to read in data, or a list of data packets with a maximum length of **batch-size**. Work units are added to the tail of the work queue when either: (1) a client is attempting to send data to be read, (2) the intermediary data queue has reached a length of **batch-size** or (3) a **batch-time** has expired since the previous unit was processed. An available worker thread is assigned to the work unit when an item is available in the queue.    
+A thread pool manager maintains list of the work that needs to be performed by the threads. It maintains these work units in a FIFO queue implemented using a linked blocking queue. Each unit of work is either a new connection to establish, a connection to read in data, or a list of data packets with a maximum length of **batch-size**. Work units are added to the tail of the work queue when either: (1) a client is attempting to register with the server, (2) data has to be read from a client, (3) the intermediary data queue has reached a length of **batch-size** or (4) a **batch-time** has expired since the previous unit was processed. An available worker thread is assigned to the work unit when an item is available in the queue.    
 
 The high level architectural diagram outlining this process can be seen below.
 
@@ -25,7 +26,7 @@ There is exactly one server node in the system. The server node provides the fol
 
 4. Replies to clients by sending back a hash code for each message received. Hashes are generated using the SHA-1 algorithm.
 
-*NOTE*: The server performs functions 2, 3 and 4 by relying on the thread pool
+*NOTE*: The server performs functions 1, 2, 3 and 4 by relying on the thread pool
 
 Every 20 seconds, the server displays its current throughput (number of messages processed per second during last 20 seconds), the number of active client connections, and mean and standard deviation of per-client throughput to the console. In order to calculate the per-client throughput statistics (mean and standard deviation), the throughputs for individual clients for last 20 seconds (number of messages processed per second sent by a particular client during last 20 seconds) and calculate the mean and the standard deviation of those throughput values are maintained.  
 
