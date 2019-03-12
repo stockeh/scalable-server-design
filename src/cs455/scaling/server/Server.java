@@ -6,6 +6,7 @@ import java.net.InetSocketAddress;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
+import java.nio.channels.SocketChannel;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Timer;
@@ -146,11 +147,9 @@ class Server {
 
         SelectionKey key = iter.next();
 
-        if ( key.isAcceptable() && key.attachment() == null )
+        if ( key.isAcceptable() )
         {
-          key.attach( statistics );
-          threadPoolManager
-              .addTask( new Register( selector, serverSocket, key ) );
+          register( key, selector, serverSocket );
         }
 
         else if ( key.isReadable() && key.attachment() == null )
@@ -161,5 +160,24 @@ class Server {
         iter.remove();
       }
     }
+  }
+  
+  private void register(SelectionKey key, Selector selector,
+		  ServerSocketChannel serverSocket) {
+    SocketChannel client;
+    try
+    {
+      client = serverSocket.accept();
+      client.configureBlocking( false );
+      client.register( selector, SelectionKey.OP_READ );
+    } catch ( IOException e )
+    {
+      LOG.error( "Thread pool is interrupted due to an issue: " + e.getMessage()
+          + ", unable to register client with selector." );
+      return;
+    }
+
+    statistics.register( client );
+    key.attach( null );
   }
 }
