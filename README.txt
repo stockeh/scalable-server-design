@@ -116,7 +116,6 @@ cs455.scaling.server: consists of classes responsible for the server, thread poo
 		number of threads. The following functionalities will be provided,
 		and rely on this thread pool:
 	
-		- Accept incoming network connections from the clients.
 		- Accept incoming traffic from these connections.
 		- Groups data from the clients together into batches.
 		- Replies to clients by sending back a hash code for each message
@@ -148,22 +147,14 @@ cs455.scaling.server: consists of classes responsible for the server, thread poo
  	
 		@author stock
 
-cs455.scaling.server.taks: A task interface contains classes for registering, receiving, and writing data.
+cs455.scaling.server.taks: A task interface contains classes for receiving and writing data.
 
 	- Task.java
 
 		Public interface to delegate tasks to available working threads.
-		This can include; registering new clients via {@link Register},
-		reading data from clients via the {@link Receiver}, and sending data
- 		back to clients with the {@link Sender}.
+		This can include; reading data from clients via the {@link Receiver},
+		and sending data back to clients with the {@link Sender}.
 	 
-		@author stock
-
-	- Register.java
-
-		Task to delegate registration of a client with the server
-		(selector).
-	
 		@author stock
 	
 	- Receiver.java
