@@ -139,7 +139,7 @@ class Server {
       throws IOException, InterruptedException {
     while ( true )
     {
-      selector.select();
+      selector.selectNow();
       Iterator<SelectionKey> iter = selector.selectedKeys().iterator();
       while ( iter.hasNext() )
       {
