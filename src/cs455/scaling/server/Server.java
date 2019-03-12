@@ -11,7 +11,6 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.Timer;
 import cs455.scaling.server.task.Receiver;
-import cs455.scaling.server.task.Register;
 import cs455.scaling.util.Logger;
 
 /**
@@ -23,7 +22,6 @@ import cs455.scaling.util.Logger;
  * and rely on this thread pool:
  * 
  * <ul>
- * <li>Accept incoming network connections from the clients.</li>
  * <li>Accept incoming traffic from these connections.</li>
  * <li>Groups data from the clients together into batches.</li>
  * <li>Replies to clients by sending back a hash code for each message
@@ -161,9 +159,18 @@ class Server {
       }
     }
   }
-  
+
+  /**
+   * Invoked upon a new client registering itself with the server. The
+   * server can perform this more efficiently than the thread pool,
+   * hence the local operation.
+   * 
+   * @param key associated selection key to get client
+   * @param selector used to register key with
+   * @param serverSocket accepts the connection to client
+   */
   private void register(SelectionKey key, Selector selector,
-		  ServerSocketChannel serverSocket) {
+      ServerSocketChannel serverSocket) {
     SocketChannel client;
     try
     {
@@ -176,8 +183,6 @@ class Server {
           + ", unable to register client with selector." );
       return;
     }
-
     statistics.register( client );
-    key.attach( null );
   }
 }
