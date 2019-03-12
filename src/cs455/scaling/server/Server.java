@@ -6,11 +6,11 @@ import java.net.InetSocketAddress;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
+import java.nio.channels.SocketChannel;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Timer;
 import cs455.scaling.server.task.Receiver;
-import cs455.scaling.server.task.Register;
 import cs455.scaling.util.Logger;
 
 /**
@@ -22,7 +22,6 @@ import cs455.scaling.util.Logger;
  * and rely on this thread pool:
  * 
  * <ul>
- * <li>Accept incoming network connections from the clients.</li>
  * <li>Accept incoming traffic from these connections.</li>
  * <li>Groups data from the clients together into batches.</li>
  * <li>Replies to clients by sending back a hash code for each message
@@ -146,11 +145,9 @@ class Server {
 
         SelectionKey key = iter.next();
 
-        if ( key.isAcceptable() && key.attachment() == null )
+        if ( key.isAcceptable() )
         {
-          key.attach( statistics );
-          threadPoolManager
-              .addTask( new Register( selector, serverSocket, key ) );
+          register( key, selector, serverSocket );
         }
 
         else if ( key.isReadable() && key.attachment() == null )
@@ -161,5 +158,31 @@ class Server {
         iter.remove();
       }
     }
+  }
+
+  /**
+   * Invoked upon a new client registering itself with the server. The
+   * server can perform this more efficiently than the thread pool,
+   * hence the local operation.
+   * 
+   * @param key associated selection key to get client
+   * @param selector used to register key with
+   * @param serverSocket accepts the connection to client
+   */
+  private void register(SelectionKey key, Selector selector,
+      ServerSocketChannel serverSocket) {
+    SocketChannel client;
+    try
+    {
+      client = serverSocket.accept();
+      client.configureBlocking( false );
+      client.register( selector, SelectionKey.OP_READ );
+    } catch ( IOException e )
+    {
+      LOG.error( "Thread pool is interrupted due to an issue: " + e.getMessage()
+          + ", unable to register client with selector." );
+      return;
+    }
+    statistics.register( client );
   }
 }
