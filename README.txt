@@ -45,7 +45,7 @@ these values, but can be changed.
 		RATE=3
 
 		POOL_SIZE=10
-		BATCH_SIZE=100
+		BATCH_SIZE=50
 		BATCH_TIME=5
 
 	2. Add or remove desired clients to the application. Each machine should be on a new line, and can all be
@@ -118,7 +118,8 @@ cs455.scaling.server: consists of classes responsible for the server, thread poo
 		A server node will spawn a new thread pool manager with a set
 		number of threads. The following functionalities will be provided,
 		and rely on this thread pool:
-	
+		
+		- Accept incoming network connections from the clients.
 		- Accept incoming traffic from these connections.
 		- Groups data from the clients together into batches.
 		- Replies to clients by sending back a hash code for each message

@@ -50,6 +50,7 @@ class WorkerThread implements Runnable {
     {
       try
       {
+        // An available thread will take the item for processing
         task = queue.take();
       } catch ( InterruptedException e )
       {
@@ -60,6 +61,7 @@ class WorkerThread implements Runnable {
       LOG.debug(
           "Thread: " + Integer.toString( identifier ) + " is executing." );
       task.process();
+      // A thread will become "available" after returning from the task
     }
   }
 }
