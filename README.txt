@@ -42,7 +42,7 @@ these values, but can be changed.
 
 		HOST=indianapolis
 		PORT=5001
-		RATE=5
+		RATE=3
 
 		POOL_SIZE=10
 		BATCH_SIZE=100
@@ -155,9 +155,17 @@ cs455.scaling.server.taks: A task interface contains classes for receiving and w
 	- Task.java
 
 		Public interface to delegate tasks to available working threads.
-		This can include; reading data from clients via the {@link Receiver},
-		and sending data back to clients with the {@link Sender}.
+		This can include; registering new clients with {@link Register},
+		reading data from clients via the {@link Receiver}, and sending
+		data back to clients with the {@link Sender}.
 	 
+		@author stock
+
+	- Register.java
+
+		Task to delegate registration of a client with the server
+ 		(selector).
+
 		@author stock
 	
 	- Receiver.java
@@ -198,16 +206,8 @@ cs455.scaling.util: Package for application utilities, and reused code.
 		@author stock
 
 
+-- 
 
+THANK YOU!!
 
-
-
-
-
-
-
-
-
-
-
-
+Jason D. Stock

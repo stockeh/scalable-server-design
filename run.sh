@@ -15,7 +15,7 @@ BUILD="$DIR/build/classes/java/main"
 
 HOST=indianapolis
 PORT=5001
-RATE=4
+RATE=3
 
 POOL_SIZE=10
 BATCH_SIZE=50
