@@ -24,6 +24,7 @@ public class ServerStatistics extends TimerTask {
    */
   private static final Logger LOG = new Logger( true, false );
 
+  private static final double TIME_FRAME = 20.0;
 
   /**
    * Maintain a map of active clients, and the number of messages each
@@ -63,6 +64,7 @@ public class ServerStatistics extends TimerTask {
     map.computeIfAbsent( client, (v) -> new LongAdder() ).increment();
   }
 
+
   /**
    * Display the statistics for the current running server.
    * 
@@ -84,7 +86,8 @@ public class ServerStatistics extends TimerTask {
     synchronized ( map )
     {
       double totalPerSecond =
-          map.values().stream().mapToInt( i -> i.intValue() ).sum() / 20.0;
+          map.values().stream().mapToInt( i -> i.intValue() ).sum()
+              / TIME_FRAME;
 
       double activeClients = map.size();
 
@@ -94,15 +97,15 @@ public class ServerStatistics extends TimerTask {
       {
         mean /= activeClients;
 
-        double temp = 0;
-        double scaledMean = mean * 20;
+        double sum = 0;
+        double scaledMean = mean * TIME_FRAME;
         for ( LongAdder val : map.values() )
         {
           int value = val.intValue();
-          temp += ( value - scaledMean ) * ( value - scaledMean );
+          sum += Math.pow( value - scaledMean, 2 );
         }
 
-        std = Math.sqrt( temp / ( activeClients ) );
+        std = Math.sqrt( sum / activeClients  ) / TIME_FRAME;
       }
       NumberFormat formatter = new DecimalFormat( "#0.000" );
 
