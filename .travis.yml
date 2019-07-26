@@ -1,5 +1,6 @@
 language: java
-jdk: oraclejdk8
+jdk:
+  - oraclejdk8
 
 addons:
   sonarcloud:
@@ -8,4 +9,8 @@ addons:
 script:
   - gradle clean
   - gradle build
-  - sonar-scanner -Dsonar.verbose=true -Dsonar.projectKey=stockeh_scalable-server-design -Dsonar.host.url=https://sonarcloud.io -X
+  - gradle sonarqube -Dsonar.verbose=true -Dsonar.projectKey=stockeh_scalable-server-design -Dsonar.host.url=https://sonarcloud.io -X
+
+cache:
+  directories:
+    - '.gradle'
