@@ -6,6 +6,9 @@ addons:
   sonarcloud:
     organization: "stockeh"
 
+git
+  depth: false
+
 script:
   - echo $SONARQUBE_SCANNER_PARAMS
   - gradle sonarqube
