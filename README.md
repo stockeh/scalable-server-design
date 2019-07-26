@@ -1,4 +1,7 @@
 # Distributed Computing
+
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=stockeh_scalable-server-design&metric=alert_status)](https://sonarcloud.io/dashboard?id=stockeh_scalable-server-design)  
+
 **Using Thread Pools & Micro Batching to Manage and Load Balance Active Network Connections**  
 
 This project focuses on developing a server to handle network traffic with the design of a custom tread pool. This thread pool is configurable to manage a number of threads that will be used to perform tasks relating to network communications. This includes:  
