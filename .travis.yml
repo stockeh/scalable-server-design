@@ -6,7 +6,7 @@ addons:
   sonarcloud:
     organization: "stockeh"
 
-git
+git:
   depth: false
 
 script:
