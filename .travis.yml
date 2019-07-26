@@ -7,7 +7,7 @@ addons:
     organization: "stockeh"
 
 script:
-  - gradle sonarqube -Dsonar.verbose=true
+  - gradle sonarqube
 
 cache:
   directories:
