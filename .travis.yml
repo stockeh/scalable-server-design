@@ -7,9 +7,7 @@ addons:
     organization: "stockeh"
 
 script:
-  - gradle clean
-  - gradle build
-  - gradle sonarqube -Dsonar.verbose=true -Dsonar.projectKey=stockeh_scalable-server-design -Dsonar.host.url=https://sonarcloud.io -X
+  - gradle sonarqube -Dsonar.verbose=true -Dsonar.projectKey=stockeh_scalable-server-design -Dsonar.host.url=https://sonarcloud.io
 
 cache:
   directories:
