@@ -7,10 +7,8 @@ addons:
     organization: "stockeh"
 
 script:
+  - echo $SONARQUBE_SCANNER_PARAMS
   - gradle sonarqube
-
-git:
-  depth: false
 
 cache:
   directories:
