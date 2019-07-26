@@ -11,6 +11,7 @@ git:
 
 script:
   - echo $SONARQUBE_SCANNER_PARAMS
+  - gradle build
   - gradle sonarqube
 
 cache:
