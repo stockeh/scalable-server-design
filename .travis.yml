@@ -9,6 +9,9 @@ addons:
 script:
   - gradle sonarqube
 
+git:
+  depth: false
+
 cache:
   directories:
     - '.gradle'
