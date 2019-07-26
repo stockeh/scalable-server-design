@@ -12,7 +12,7 @@ sourceSets {
 }
 
 sonarqube {
-  properties {
-    sonar.projectKey: stockeh_scalable-server-design
-  }
+    properties {
+        property "sonar.projectKey", "stockeh_scalable-server-design"
+    }
 }
