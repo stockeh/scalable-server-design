@@ -1,6 +1,6 @@
 # Distributed Computing
 
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=stockeh_scalable-server-design&metric=alert_status)](https://sonarcloud.io/dashboard?id=stockeh_scalable-server-design)  
+[![Build Status](https://travis-ci.com/stockeh/scalable-server-design.svg?branch=master)](https://travis-ci.com/stockeh/scalable-server-design) [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=stockeh_scalable-server-design&metric=alert_status)](https://sonarcloud.io/dashboard?id=stockeh_scalable-server-design)  
 
 **Using Thread Pools & Micro Batching to Manage and Load Balance Active Network Connections**  
 
